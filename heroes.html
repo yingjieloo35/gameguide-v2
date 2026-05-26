@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英雄图鉴 · 元流志</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.heroes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.hero-card {
+  background: rgba(245,239,224,0.03); border: 1px solid rgba(245,239,224,0.08);
+  border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit;
+  transition: all 0.28s; display: block; scroll-margin-top: 80px;
+}
+.hero-card:hover { border-color: rgba(200,146,42,0.4); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+.hero-banner {
+  height: 140px; display: flex; align-items: center; justify-content: center;
+  font-size: 64px; position: relative; overflow: hidden;
+}
+.hb-bg { position: absolute; inset: 0; }
+.hb-glow { position: absolute; width: 100%; height: 100%; border-radius: 50%; filter: blur(40px); opacity: 0.3; }
+.hb-emoji { position: relative; z-index: 1; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.8)); }
+
+.hero-body { padding: 20px; }
+.hero-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.hero-name { font-family: 'Noto Serif SC', serif; font-size: 20px; font-weight: 700; color: var(--paper); }
+.hero-en { font-size: 11px; color: rgba(245,239,224,0.35); letter-spacing: 0.08em; margin-top: 2px; }
+.hero-tier { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; padding: 4px 12px; border-radius: 4px; }
+.tier-s-badge { background: rgba(232,184,75,0.15); color: var(--gold-light); border: 1px solid rgba(232,184,75,0.3); }
+.tier-a-badge { background: rgba(155,33,32,0.15); color: #e08080; border: 1px solid rgba(155,33,32,0.25); }
+.tier-b-badge { background: rgba(26,107,107,0.15); color: var(--teal-light); border: 1px solid rgba(26,107,107,0.25); }
+
+.hero-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.hero-tag { font-size: 10px; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em; }
+.ht-fighter { background: rgba(200,146,42,0.12); color: var(--gold); border: 1px solid rgba(200,146,42,0.2); }
+.ht-tank    { background: rgba(26,107,107,0.12); color: var(--teal-light); border: 1px solid rgba(26,107,107,0.2); }
+.ht-mage    { background: rgba(100,50,200,0.12); color: #a08ae2; border: 1px solid rgba(100,50,200,0.2); }
+.ht-support { background: rgba(50,150,80,0.12); color: #80e2a0; border: 1px solid rgba(50,150,80,0.2); }
+.ht-ranged  { background: rgba(155,33,32,0.12); color: #e07070; border: 1px solid rgba(155,33,32,0.2); }
+
+.hero-desc { font-size: 13px; color: rgba(245,239,224,0.6); line-height: 1.75; margin-bottom: 16px; }
+
+.hero-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+.hero-stat { background: rgba(245,239,224,0.04); border-radius: 6px; padding: 10px; text-align: center; }
+.hs-label { font-size: 10px; color: rgba(245,239,224,0.35); letter-spacing: 0.08em; margin-bottom: 4px; }
+.hs-val { font-family: 'Cinzel', serif; font-size: 16px; color: var(--gold-light); }
+
+.hero-weapons { margin-bottom: 14px; }
+.hw-title { font-size: 11px; letter-spacing: 0.12em; color: rgba(245,239,224,0.4); text-transform: uppercase; margin-bottom: 8px; }
+.hw-list { display: flex; gap: 6px; flex-wrap: wrap; }
+.hw-item { font-size: 12px; padding: 3px 10px; background: rgba(245,239,224,0.05); border: 1px solid rgba(245,239,224,0.1); border-radius: 4px; color: rgba(245,239,224,0.7); }
+
+.hero-skills { border-top: 1px solid rgba(245,239,224,0.06); padding-top: 14px; }
+.skill-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(245,239,224,0.04); }
+.skill-item:last-child { border-bottom: none; }
+.skill-key { font-family: 'Cinzel', serif; font-size: 10px; color: var(--gold); background: rgba(200,146,42,0.1); border: 1px solid rgba(200,146,42,0.2); border-radius: 3px; padding: 2px 6px; flex-shrink: 0; align-self: flex-start; margin-top: 1px; }
+.skill-info .skill-name { font-size: 13px; font-weight: 500; color: var(--paper); margin-bottom: 2px; }
+.skill-info .skill-desc { font-size: 11px; color: rgba(245,239,224,0.5); line-height: 1.5; }
+
+@media(max-width:900px){ .heroes-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:600px){ .heroes-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-mark">元</div>元流志</a>
+    <div class="nav-links">
+      <a href="index.html">首页</a>
+      <a href="heroes.html" class="active">英雄图鉴</a>
+      <a href="bosses.html">Boss攻略</a>
+      <a href="map.html">地图探索</a>
+      <a href="tier.html">强度榜</a>
+      <a href="news.html">版本资讯</a>
+    </div>
+    <div class="nav-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="搜索英雄…">
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">首页</a><a href="heroes.html" class="active">英雄图鉴</a><a href="bosses.html">Boss攻略</a><a href="map.html">地图探索</a><a href="tier.html">强度榜</a><a href="news.html">版本资讯</a>
+</div>
+
+<div class="wrap">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">首页</a><span>/</span><span>英雄图鉴</span></div>
+    <div class="page-eyebrow">Resonance · Heroes</div>
+    <h1 class="page-title">共鸣<em>英雄图鉴</em></h1>
+    <p class="page-desc">收录全部 11 位可操控共鸣英雄的详细数据、技能说明、武器推荐与流派强度评级。</p>
+  </div>
+
+  <div class="filter-bar reveal">
+    <button class="filter-btn active" data-filter="all">全部英雄</button>
+    <button class="filter-btn" data-filter="fighter">战士</button>
+    <button class="filter-btn" data-filter="ranged">远程</button>
+    <button class="filter-btn" data-filter="tank">坦克</button>
+    <button class="filter-btn" data-filter="mage">法师</button>
+    <button class="filter-btn" data-filter="support">辅助</button>
+  </div>
+
+  <div class="heroes-grid">
+
+    <!-- 元流之子 -->
+    <a href="#yuanliuzhi" id="yuanliuzhi" class="hero-card reveal" data-category="fighter">
+      <div class="hero-banner">
+        <div class="hb-bg" style="background:linear-gradient(135deg,#1a2a4a,#0a0f20);"></div>
+        <div class="hb-glow" style="background:rgba(100,140,220,0.8);"></div>
+        <span class="hb-emoji">🌟</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-header">
+          <div><div class="hero-name">元流之子</div><div class="hero-en">Child of Yuanliu</div></div>
+          <span class="hero-tier tier-s-badge">S</span>
+        </div>
+        <div class="hero-tags"><span class="hero-tag ht-fighter">战士</span><span class="hero-tag ht-fighter">主角</span></div>
+        <p class="hero-desc">本作主角，可切换四种武器形态进行战斗。每种武器对应独立技能树，合理循环可发挥最高输出。目前版本强度最高的共鸣之一。</p>
+        <div class="hero-stats-row">
+          <div class="hero-stat"><div class="hs-label">攻击</div><div class="hs-val">A+</div></div>
+          <div class="hero-stat"><div class="hs-label">机动</div><div class="hs-val">A</div></div>
+          <div class="hero-stat"><div class="hs-label">生存</div><div class="hs-val">B+</div></div>
+        </div>
+        <div class="hero-weapons"><div class="hw-title">推荐武器形态</div><div class="hw-list"><span class="hw-item">⚔️ 长刃</span><span class="hw-item">🏹 弓矢</span><span class="hw-item">🌀 法杖</span><span class="hw-item">🛡️ 重甲</span></div></div>
+        <div class="hero-skills">
+          <div class="skill-item"><div class="skill-key">E</div><div class="skill-info"><div class="skill-name">元流斩击</div><div class="skill-desc">造成物理伤害并积累共鸣槽，满槽触发强化状态。</div></div></div>
+          <div class="skill-item"><div class="skill-key">Q</div><div class="skill-info"><div class="skill-name">共鸣爆发</div><div class="skill-desc">消耗全部共鸣槽，释放范围大招，伤害随槽量提升。</div></div></div>
+          <div class="skill-item"><div class="skill-key">空格</div><div class="skill-info"><div class="skill-name">形态切换</div><div class="skill-desc">在四种武器形态之间切换，切换时有短暂无敌帧。</div></div></div>
+        </div>
+      </div>
+    </a>
+
+    <!-- 李信 -->
+    <a href="#lixin" id="lixin" class="hero-card reveal" data-category="fighter">
+      <div class="hero-banner">
+        <div class="hb-bg" style="background:linear-gradient(135deg,#1a2a4a,#0d0b06);"></div>
+        <div class="hb-glow" style="background:rgba(100,140,220,0.8);"></div>
+        <span class="hb-emoji">⚡</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-header">
+          <div><div class="hero-name">李信</div><div class="hero-en">Li Xin · Thunder Knight</div></div>
+          <span class="hero-tier tier-s-badge">S</span>
+        </div>
+        <div class="hero-tags"><span class="hero-tag ht-fighter">战士</span><span class="hero-tag ht-fighter">近战</span></div>
+        <p class="hero-desc">双刃近战爆发型共鸣，拥有极高的爆发伤害与优秀的位移能力。在Boss战中通过精确的连招循环可以打出版本最高单体伤害。</p>
+        <div class="hero-stats-row">
+          <div class="hero-stat"><div class="hs-label">攻击</div><div class="hs-val">S</div></div>
+          <div class="hero-stat"><div class="hs-label">机动</div><div class="hs-val">A+</div></div>
+          <div class="hero-stat"><div class="hs-label">生存</div><div class="hs-val">B</div></div>
+        </div>
+        <div class="hero-weapons"><div class="hw-title">推荐武器</div><div class="hw-list"><span class="hw-item">⚡ 斩铁双刃</span><span class="hw-item">🗡️ 疾风短剑</span></div></div>
+        <div class="hero-skills">
+          <div class="skill-item"><div class="skill-key">E</div><div class="skill-info"><div class="skill-name">雷裂斩</div><div class="skill-desc">三段斩击，第三段附带雷电属性追加伤害。</div></div></div>
+          <div class="skill-item"><div class="skill-key">Q</div><div class="skill-info"><div class="skill-name">霆击破军</div><div class="skill-desc">极速冲刺到目标位置并造成大范围雷电伤害。</div></div></div>
+          <div class="skill-item"><div class="skill-key">完美闪避后</div><div class="skill-info"><div class="skill-name">雷影残影</div><div class="skill-desc">完美闪避后 0.5 秒内反击，伤害提升 40%。</div></div></div>
+        </div>
+      </div>
+    </a>
+
+    <!-- 公孙离 -->
+    <a href="#gongsunli" id="gongsunli" class="hero-card reveal" data-category="ranged">
+      <div class="hero-banner">
+        <div class="hb-bg" style="background:linear-gradient(135deg,#3a1a1a,#0d0b06);"></div>
+        <div class="hb-glow" style="background:rgba(220,100,50,0.8);"></div>
+        <span class="hb-emoji">🔥</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-header">
+          <div><div class="hero-name">公孙离</div><div class="hero-en">Gongsun Li · Flame Archer</div></div>
+          <span class="hero-tier tier-s-badge">S</span>
+        </div>
+        <div class="hero-tags"><span class="hero-tag ht-ranged">射手</span><span class="hero-tag ht-ranged">远程</span></div>
+        <p class="hero-desc">远程持续输出型共鸣，拥有出色的位移能力与范围攻击。S0 版本射程提升 8% 后，安全输出能力明显提升，适合不熟悉近战的玩家。</p>
+        <div class="hero-stats-row">
+          <div class="hero-stat"><div class="hs-label">攻击</div><div class="hs-val">A+</div></div>
+          <div class="hero-stat"><div class="hs-label">机动</div><div class="hs-val">S</div></div>
+          <div class="hero-stat"><div class="hs-label">生存</div><div class="hs-val">A</div></div>
+        </div>
+        <div class="hero-weapons"><div class="hw-title">推荐武器</div><div class="hw-list"><span class="hw-item">🏹 焰羽弓</span><span class="hw-item">🌀 风刃弩</span></div></div>
+        <div class="hero-skills">
+          <div class="skill-item"><div class="skill-key">普攻</div><div class="skill-info"><div class="skill-name">连珠矢</div><div class="skill-desc">五段箭矢连射，第五段为爆炸箭造成溅射。</div></div></div>
+          <div class="skill-item"><div class="skill-key">E</div><div class="skill-info"><div class="skill-name">飞燕回旋</div><div class="skill-desc">快速后跳并同时释放三连射，可二段使用。</div></div></div>
+          <div class="skill-item"><div class="skill-key">Q</div><div class="skill-info"><div class="skill-name">灼热流星</div><div class="skill-desc">锁定区域投放密集弹幕，持续 4 秒高额输出。</div></div></div>
+        </div>
+      </div>
+    </a>
+
+    <!-- 庄周 -->
+    <a href="#zhuangzhou" id="zhuangzhou" class="hero-card reveal" data-category="tank">
+      <div class="hero-banner">
+        <div class="hb-bg" style="background:linear-gradient(135deg,#1a3a2a,#0d0b06);"></div>
+        <div class="hb-glow" style="background:rgba(50,180,120,0.8);"></div>
+        <span class="hb-emoji">🌿</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-header">
+          <div><div class="hero-name">庄周</div><div class="hero-en">Zhuang Zhou · Dream Turtle</div></div>
+          <span class="hero-tier tier-a-badge">A</span>
+        </div>
+        <div class="hero-tags"><span class="hero-tag ht-tank">坦克</span><span class="hero-tag ht-support">辅助</span></div>
+        <p class="hero-desc">高耐久坦克共鸣，以护盾与控场为核心。S0 版本技能循环频率下调，整体强度略降。适合喜欢稳健打法或组队担任先锋的玩家。</p>
+        <div class="hero-stats-row">
+          <div class="hero-stat"><div class="hs-label">攻击</div><div class="hs-val">B</div></div>
+          <div class="hero-stat"><div class="hs-label">机动</div><div class="hs-val">B+</div></div>
+          <div class="hero-stat"><div class="hs-label">生存</div><div class="hs-val">S</div></div>
+        </div>
+        <div class="hero-weapons"><div class="hw-title">推荐武器</div><div class="hw-list"><span class="hw-item">🛡️ 玄甲巨盾</span><span class="hw-item">🌿 梦境图腾</span></div></div>
+        <div class="hero-skills">
+          <div class="skill-item"><div class="skill-key">E</div><div class="skill-info"><div class="skill-name">凝梦护盾</div><div class="skill-desc">为自身生成护盾，护盾量基于最大生命值的 35%。</div></div></div>
+          <div class="skill-item"><div class="skill-key">Q</div><div class="skill-info"><div class="skill-name">混沌梦蝶</div><div class="skill-desc">召唤梦境蝴蝶群扰乱周围敌人视野并使其减速。</div></div></div>
+        </div>
+      </div>
+    </a>
+
+    <!-- 甄姬 -->
+    <a href="#zhenji" id="zhenji" class="hero-card reveal" data-category="mage">
+      <div class="hero-banner">
+        <div class="hb-bg" style="background:linear-gradient(135deg,#2a1a3a,#0d0b06);"></div>
+        <div class="hb-glow" style="background:rgba(150,80,220,0.8);"></div>
+        <span class="hb-emoji">🎵</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-header">
+          <div><div class="hero-name">甄姬</div><div class="hero-en">Zhen Ji · Frost Songstress</div></div>
+          <span class="hero-tier tier-a-badge">A</span>
+        </div>
+        <div class="hero-tags"><span class="hero-tag ht-mage">法师</span><span class="hero-tag ht-ranged">远程</span></div>
+        <p class="hero-desc">冰霜属性法术共鸣，以减速与冻结配合高额法术爆发。S0 版本强度上升，在冰属性弱点 Boss 战中有极强表现，配合冥凰副本提升明显。</p>
+        <div class="hero-stats-row">
+          <div class="hero-stat"><div class="hs-label">攻击</div><div class="hs-val">A+</div></div>
+          <div class="hero-stat"><div class="hs-label">机动</div><div class="hs-val">B</div></div>
+          <div class="hero-stat"><div class="hs-label">生存</div><div class="hs-val">B</div></div>
+        </div>
+        <div class="hero-weapons"><div class="hw-title">推荐武器</div><div class="hw-list"><span class="hw-item">🎵 冰弦琵琶</span><span class="hw-item">❄️ 霜华法典</span></div></div>
+        <div class="hero-skills">
+          <div class="skill-item"><div class="skill-key">E</div><div class="skill-info"><div class="skill-name">霜音律</div><div class="skill-desc">发出冰霜音波，命中敌人施加减速并积累冻结值。</div></div></div>
+          <div class="skill-item"><div class="skill-key">Q</div><div class="skill-info"><div class="skill-name">寒冰咏叹</div><div class="skill-desc">吟唱大招造成范围法术伤害并冻结命中敌人 3 秒。</div></div></div>
+        </div>
+      </div>
+    </a>
+
+    <!-- 兰陵王 -->
+    <a href="#lanlingwang" id="lanlingwang" class="hero-card reveal" data-category="fighter">
+      <div class="hero-banner">
+        <div class="hb-bg" style="background:linear-gradient(135deg,#1a1a2a,#0a0a18);"></div>
+        <div class="hb-glow" style="background:rgba(80,60,200,0.8);"></div>
+        <span class="hb-emoji">🎭</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-header">
+          <div><div class="hero-name">兰陵王</div><div class="hero-en">Lanling Wang · Shadow Blade</div></div>
+          <span class="hero-tier tier-b-badge">B</span>
+        </div>
+        <div class="hero-tags"><span class="hero-tag ht-fighter">刺客</span><span class="hero-tag ht-fighter">隐匿</span></div>
+        <p class="hero-desc">隐匿刺客型共鸣，依靠潜行进行致命一击。在 PvE 环境中受到一定限制，Boss 频繁转身削弱了隐匿优势，整体评级 B。</p>
+        <div class="hero-stats-row">
+          <div class="hero-stat"><div class="hs-label">攻击</div><div class="hs-val">A</div></div>
+          <div class="hero-stat"><div class="hs-label">机动</div><div class="hs-val">A+</div></div>
+          <div class="hero-stat"><div class="hs-label">生存</div><div class="hs-val">C+</div></div>
+        </div>
+        <div class="hero-weapons"><div class="hw-title">推荐武器</div><div class="hw-list"><span class="hw-item">🎭 幻面长枪</span><span class="hw-item">🌑 暗影匕首</span></div></div>
+        <div class="hero-skills">
+          <div class="skill-item"><div class="skill-key">E</div><div class="skill-info"><div class="skill-name">幻面潜行</div><div class="skill-desc">进入隐匿状态持续 5 秒，期间移速提升 30%。</div></div></div>
+          <div class="skill-item"><div class="skill-key">Q</div><div class="skill-info"><div class="skill-name">破阵刺</div><div class="skill-desc">从隐匿状态发动时伤害提升 60%，附带穿透效果。</div></div></div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <div style="text-align:center; padding: 40px 0 20px; color: rgba(245,239,224,0.35); font-size:13px;">
+    更多英雄持续更新中 · 当前显示 6 / 11 位共鸣
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand"><div class="footer-logo">元流志</div><div class="footer-desc">Honor of Kings: World 第三方攻略社区，由玩家自发整理维护。</div></div>
+      <div class="footer-links">
+        <div class="footer-col"><div class="footer-col-title">攻略</div><a href="heroes.html">英雄图鉴</a><a href="bosses.html">Boss图鉴</a><a href="map.html">地图探索</a><a href="tier.html">强度榜单</a></div>
+        <div class="footer-col"><div class="footer-col-title">资讯</div><a href="news.html">版本动态</a><a href="tier.html">赛季榜</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="footer-disclaimer">本站为玩家自发整理的第三方内容站，与 Tencent Games 无官方关联。</div><div>© 2026 元流志</div></div>
+  </div>
+</footer>
+<script src="shared.js"></script>
+</body>
+</html>

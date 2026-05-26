@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boss攻略 · 元流志</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.boss-full-grid { display: grid; grid-template-columns: 1fr; gap: 28px; }
+.boss-article {
+  background: rgba(245,239,224,0.03); border: 1px solid rgba(245,239,224,0.08);
+  border-radius: 12px; overflow: hidden; scroll-margin-top: 80px;
+}
+.boss-article-banner {
+  height: 160px; display: flex; align-items: center; justify-content: center;
+  font-size: 72px; position: relative; overflow: hidden;
+}
+.ba-bg { position: absolute; inset: 0; }
+.ba-glow { position: absolute; width: 300px; height: 300px; border-radius: 50%; filter: blur(60px); opacity: 0.4; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+.ba-label {
+  position: absolute; top: 16px; left: 20px; font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: 0.25em; padding: 3px 12px; border-radius: 2px;
+}
+.ba-emoji { position: relative; z-index: 1; filter: drop-shadow(0 4px 24px rgba(0,0,0,0.9)); }
+
+.boss-article-body { padding: 28px; }
+.boss-article-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.boss-article-title { font-family: 'Noto Serif SC', serif; font-size: 26px; font-weight: 700; color: var(--paper); }
+.boss-article-en { font-size: 12px; color: rgba(245,239,224,0.35); letter-spacing: 0.1em; margin-top: 3px; }
+.boss-meta-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.boss-pill { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+.bp-fire    { background: rgba(155,33,32,0.15); color: #e07070; border: 1px solid rgba(155,33,32,0.2); }
+.bp-thunder { background: rgba(74,144,217,0.15); color: #7ab8e0; border: 1px solid rgba(74,144,217,0.2); }
+.bp-ice     { background: rgba(6,182,212,0.15); color: #67e8f9; border: 1px solid rgba(6,182,212,0.2); }
+.bp-elite   { background: rgba(200,146,42,0.15); color: var(--gold); border: 1px solid rgba(200,146,42,0.2); }
+.bp-world   { background: rgba(155,33,32,0.2); color: #e07070; border: 1px solid rgba(155,33,32,0.3); }
+
+.boss-overview { font-size: 14px; color: rgba(245,239,224,0.65); line-height: 1.85; margin-bottom: 24px; }
+
+.boss-info-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+.boss-info-box { background: rgba(245,239,224,0.04); border-radius: 8px; padding: 14px; text-align: center; }
+.bib-label { font-size: 10px; color: rgba(245,239,224,0.35); letter-spacing: 0.1em; margin-bottom: 6px; }
+.bib-val { font-family: 'Cinzel', serif; font-size: 15px; color: var(--gold-light); }
+
+.boss-phases { margin-bottom: 24px; }
+.bp-title { font-family: 'Noto Serif SC', serif; font-size: 16px; font-weight: 600; color: var(--paper); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.bp-title::before { content:''; width:3px; height:16px; background:linear-gradient(to bottom,var(--gold-light),var(--gold)); border-radius:2px; }
+.phase-list { display: flex; flex-direction: column; gap: 10px; }
+.phase-item { display: flex; gap: 14px; }
+.phase-num { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); background: rgba(200,146,42,0.1); border: 1px solid rgba(200,146,42,0.2); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.phase-content .phase-name { font-size: 14px; font-weight: 500; color: var(--paper); margin-bottom: 3px; }
+.phase-content .phase-desc { font-size: 12px; color: rgba(245,239,224,0.55); line-height: 1.65; }
+
+.boss-tips { margin-bottom: 24px; }
+.tips-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.tip-item { background: rgba(245,239,224,0.03); border: 1px solid rgba(245,239,224,0.07); border-radius: 8px; padding: 14px; }
+.tip-icon { font-size: 20px; margin-bottom: 8px; }
+.tip-name { font-size: 12px; font-weight: 500; color: var(--paper); margin-bottom: 4px; }
+.tip-desc { font-size: 11px; color: rgba(245,239,224,0.5); line-height: 1.6; }
+
+.boss-weakness { margin-bottom: 8px; }
+.weakness-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.we-label { font-size: 11px; color: rgba(245,239,224,0.4); width: 60px; flex-shrink: 0; }
+.we-bar { height: 6px; border-radius: 3px; }
+
+@media(max-width:900px){ .boss-info-row { grid-template-columns: repeat(2,1fr); } .tips-grid { grid-template-columns: 1fr; } }
+@media(max-width:600px){ .boss-article-header { flex-direction: column; } }
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-mark">元</div>元流志</a>
+    <div class="nav-links">
+      <a href="index.html">首页</a><a href="heroes.html">英雄图鉴</a>
+      <a href="bosses.html" class="active">Boss攻略</a>
+      <a href="map.html">地图探索</a><a href="tier.html">强度榜</a><a href="news.html">版本资讯</a>
+    </div>
+    <div class="nav-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="搜索Boss…">
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">首页</a><a href="heroes.html">英雄图鉴</a><a href="bosses.html" class="active">Boss攻略</a><a href="map.html">地图探索</a><a href="tier.html">强度榜</a><a href="news.html">版本资讯</a>
+</div>
+
+<div class="wrap">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">首页</a><span>/</span><span>Boss攻略</span></div>
+    <div class="page-eyebrow">Boss Guide · Field Bosses</div>
+    <h1 class="page-title">Boss<em>攻略图鉴</em></h1>
+    <p class="page-desc">收录目前全部 Boss 的弱点分析、阶段详解与实战技巧，持续更新中。</p>
+  </div>
+
+  <div class="filter-bar reveal">
+    <button class="filter-btn active" data-filter="all">全部Boss</button>
+    <button class="filter-btn" data-filter="fire">火焰系</button>
+    <button class="filter-btn" data-filter="thunder">雷电系</button>
+    <button class="filter-btn" data-filter="ice">冰霜系</button>
+    <button class="filter-btn" data-filter="world">世界Boss</button>
+  </div>
+
+  <div class="boss-full-grid">
+
+    <!-- 赤炎兽 -->
+    <div id="crimson" class="boss-article reveal" data-category="fire">
+      <div class="boss-article-banner">
+        <div class="ba-bg" style="background:linear-gradient(135deg,#2a0a0a,#1a0505);"></div>
+        <div class="ba-glow" style="background:rgba(220,60,30,0.8);"></div>
+        <div class="ba-label" style="background:rgba(155,33,32,0.2);color:#e07070;border:1px solid rgba(155,33,32,0.3);">精英怪 · 火焰系</div>
+        <span class="ba-emoji">🔥</span>
+      </div>
+      <div class="boss-article-body">
+        <div class="boss-article-header">
+          <div><div class="boss-article-title">赤炎兽</div><div class="boss-article-en">Crimson Beast · Elite Enemy</div></div>
+          <div class="boss-meta-pills"><span class="boss-pill bp-fire">火焰属性</span><span class="boss-pill bp-elite">精英怪</span><span class="boss-pill" style="background:rgba(245,239,224,0.05);color:rgba(245,239,224,0.6);border:1px solid rgba(245,239,224,0.1);">推荐 1~4 人</span></div>
+        </div>
+        <p class="boss-overview">赤炎兽是极星学院附近区域最常见的精英怪，拥有高攻击力与中等血量。其核心机制是通过积累「炎怒值」进入强化状态，玩家需要在炎怒爆发前迅速打断或拉开距离。弱点属性为冰系，建议携带甄姬或冰属性遗器进行克制。</p>
+        <div class="boss-info-row">
+          <div class="boss-info-box"><div class="bib-label">推荐等级</div><div class="bib-val">Lv.15+</div></div>
+          <div class="boss-info-box"><div class="bib-label">难度</div><div class="bib-val">★★★☆☆</div></div>
+          <div class="boss-info-box"><div class="bib-label">掉落材料</div><div class="bib-val">炎晶核</div></div>
+          <div class="boss-info-box"><div class="bib-label">弱点</div><div class="bib-val">❄️ 冰</div></div>
+        </div>
+        <div class="boss-phases">
+          <div class="bp-title">战斗阶段详解</div>
+          <div class="phase-list">
+            <div class="phase-item"><div class="phase-num">1</div><div class="phase-content"><div class="phase-name">第一阶段（HP 100% → 60%）</div><div class="phase-desc">常规攻击模式，包含抓取、扑击和喷火三种动作。抓取有前摇动作，可以完美闪避；喷火持续约 2 秒，向侧方绕行躲避。此阶段保持输出节奏，炎怒槽约 20 秒积满一次。</div></div></div>
+            <div class="phase-item"><div class="phase-num">2</div><div class="phase-content"><div class="phase-name">第二阶段（HP 60% → 30%）</div><div class="phase-desc">触发「炎怒爆发」，全场出现三根火焰柱，站在柱子上会持续受到灼烧伤害。Boss 移速提升 20%，新增「火焰冲撞」技能，被命中后击飞。优先躲避火焰柱，在 Boss 技能间隙输出。</div></div></div>
+            <div class="phase-item"><div class="phase-num">3</div><div class="phase-content"><div class="phase-name">第三阶段（HP 30% → 0%）</div><div class="phase-desc">进入「狂暴」状态，攻击频率提升 40%，所有技能伤害加成 25%。但此阶段 Boss 防御力下降 15%，是输出的好机会。注意锁定 Boss 背后的弱点部位（发光的脊背），攻击弱点可触发「破防」状态造成额外伤害。</div></div></div>
+          </div>
+        </div>
+        <div class="boss-tips">
+          <div class="bp-title">实战技巧</div>
+          <div class="tips-grid">
+            <div class="tip-item"><div class="tip-icon">❄️</div><div class="tip-name">携带冰属性共鸣</div><div class="tip-desc">甄姬的冻结技能可以中断赤炎兽的火焰柱技能，大幅提升安全输出窗口。</div></div>
+            <div class="tip-item"><div class="tip-icon">🏃</div><div class="tip-name">火焰柱站位</div><div class="tip-desc">第二阶段三根火焰柱固定生成在 Boss 的正前方、左后和右后。提前预判站位即可完全规避。</div></div>
+            <div class="tip-item"><div class="tip-icon">⏰</div><div class="tip-name">完美闪避时机</div><div class="tip-desc">扑击动作前摇约 0.8 秒，在 Boss 屈体瞬间按闪避可触发完美回避，获得 0.5 秒无敌帧。</div></div>
+            <div class="tip-item"><div class="tip-icon">🎯</div><div class="tip-name">弱点攻击</div><div class="tip-desc">第三阶段脊背弱点发光时集中攻击，破防后 5 秒内所有伤害提升 30%，是爆发期的最佳窗口。</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 碧方兽 -->
+    <div id="azure" class="boss-article reveal" data-category="thunder world">
+      <div class="boss-article-banner">
+        <div class="ba-bg" style="background:linear-gradient(135deg,#0a1a2a,#050d1a);"></div>
+        <div class="ba-glow" style="background:rgba(74,144,217,0.8);"></div>
+        <div class="ba-label" style="background:rgba(74,144,217,0.1);color:#7ab8e0;border:1px solid rgba(74,144,217,0.2);">世界Boss · 雷电系</div>
+        <span class="ba-emoji">⚡</span>
+      </div>
+      <div class="boss-article-body">
+        <div class="boss-article-header">
+          <div><div class="boss-article-title">碧方兽</div><div class="boss-article-en">Azure Beast · World Boss</div></div>
+          <div class="boss-meta-pills"><span class="boss-pill bp-thunder">雷电属性</span><span class="boss-pill bp-world">世界Boss</span><span class="boss-pill" style="background:rgba(245,239,224,0.05);color:rgba(245,239,224,0.6);border:1px solid rgba(245,239,224,0.1);">需 8 人以上</span></div>
+        </div>
+        <p class="boss-overview">碧方兽是当前版本的世界 Boss，每周一、三、五 20:00 在「雷震平原」定时刷新，持续 30 分钟。Boss 拥有海量血量，需要多人协同打断连续技能。弱点为大地属性，打断成功后有 8 秒硬直窗口，是全队集火爆发的关键时机。</p>
+        <div class="boss-info-row">
+          <div class="boss-info-box"><div class="bib-label">刷新时间</div><div class="bib-val">周一三五</div></div>
+          <div class="boss-info-box"><div class="bib-label">难度</div><div class="bib-val">★★★★★</div></div>
+          <div class="boss-info-box"><div class="bib-label">掉落材料</div><div class="bib-val">雷晶精华</div></div>
+          <div class="boss-info-box"><div class="bib-label">弱点</div><div class="bib-val">🌍 大地</div></div>
+        </div>
+        <div class="boss-phases">
+          <div class="bp-title">战斗阶段详解</div>
+          <div class="phase-list">
+            <div class="phase-item"><div class="phase-num">1</div><div class="phase-content"><div class="phase-name">聚集阶段（首 5 分钟）</div><div class="phase-desc">Boss 处于防御姿态，攻击力较弱，建议全队在此阶段积累技能并统一爆发时机。普通攻击可以自由输出，注意躲避范围内的闪电落地。</div></div></div>
+            <div class="phase-item"><div class="phase-num">2</div><div class="phase-content"><div class="phase-name">狂暴阶段（HP 50% 以下）</div><div class="phase-desc">全场布满「雷区」，站在上面持续受到高额雷电伤害。Boss 开始连续释放「万雷齐鸣」需要分散打断。每个打断小组至少需要 2 人配合才能成功中断。</div></div></div>
+            <div class="phase-item"><div class="phase-num">3</div><div class="phase-content"><div class="phase-name">崩溃阶段（HP 20% 以下）</div><div class="phase-desc">Boss 进入「雷鸣觉醒」，全场雷区密度倍增。此时 Boss 防御大幅下降，是最终爆发窗口。注意保留大招用于此阶段，合理分配治疗资源。</div></div></div>
+          </div>
+        </div>
+        <div class="boss-tips">
+          <div class="bp-title">组队建议</div>
+          <div class="tips-grid">
+            <div class="tip-item"><div class="tip-icon">👥</div><div class="tip-name">推荐队伍配置</div><div class="tip-desc">至少 2 名坦克（庄周）+ 4 名输出（李信/公孙离）+ 2 名辅助，合理分配打断职责。</div></div>
+            <div class="tip-item"><div class="tip-icon">⚡</div><div class="tip-name">雷区走位</div><div class="tip-desc">雷区生成有 1.5 秒预警圆圈，提前移动即可规避。切勿在雷区中释放长时间大招。</div></div>
+            <div class="tip-item"><div class="tip-icon">🎯</div><div class="tip-name">打断时机</div><div class="tip-desc">「万雷齐鸣」起手动作为 Boss 双爪收拢，此时 1.2 秒内完成打断可中断整个技能序列。</div></div>
+            <div class="tip-item"><div class="tip-icon">💰</div><div class="tip-name">首次通关奖励</div><div class="tip-desc">首周击杀可获得稀有遗器「雷晶心脏」，强烈推荐优先参与。每个账号每周只能领一次。</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 冥凰 -->
+    <div id="bifang" class="boss-article reveal" data-category="ice">
+      <div class="boss-article-banner">
+        <div class="ba-bg" style="background:linear-gradient(135deg,#0a1a2a,#050d15);"></div>
+        <div class="ba-glow" style="background:rgba(6,182,212,0.8);"></div>
+        <div class="ba-label" style="background:rgba(6,182,212,0.1);color:#67e8f9;border:1px solid rgba(6,182,212,0.2);">精英怪 · 冰霜系</div>
+        <span class="ba-emoji">❄️</span>
+      </div>
+      <div class="boss-article-body">
+        <div class="boss-article-header">
+          <div><div class="boss-article-title">冥凰（毕方）</div><div class="boss-article-en">Bi Fang · Frost Phoenix</div></div>
+          <div class="boss-meta-pills"><span class="boss-pill bp-ice">冰霜属性</span><span class="boss-pill bp-elite">精英怪</span><span class="boss-pill" style="background:rgba(245,239,224,0.05);color:rgba(245,239,224,0.6);border:1px solid rgba(245,239,224,0.1);">推荐 1~2 人</span></div>
+        </div>
+        <p class="boss-overview">冥凰是外观酷似凤凰的冰霜精英怪，位于「极寒雪山」深处。其核心机制是精准的 Perfect Dodge 判定——每次完美闪避后会积累「灼热值」，满值后可以解冻并触发弱点状态。第三阶段的全场冰封机制要求玩家提前准备解冻道具。</p>
+        <div class="boss-info-row">
+          <div class="boss-info-box"><div class="bib-label">推荐等级</div><div class="bib-val">Lv.20+</div></div>
+          <div class="boss-info-box"><div class="bib-label">难度</div><div class="bib-val">★★★☆☆</div></div>
+          <div class="boss-info-box"><div class="bib-label">掉落材料</div><div class="bib-val">霜羽结晶</div></div>
+          <div class="boss-info-box"><div class="bib-label">弱点</div><div class="bib-val">🔥 火焰</div></div>
+        </div>
+        <div class="boss-phases">
+          <div class="bp-title">战斗阶段详解</div>
+          <div class="phase-list">
+            <div class="phase-item"><div class="phase-num">1</div><div class="phase-content"><div class="phase-name">第一阶段（HP 100% → 70%）</div><div class="phase-desc">冥凰以飞行状态为主，使用俯冲和冰羽射击。俯冲前会有明显的收翅动作，此时准备闪避。冰羽射击可以格挡，格挡时积累「灼热值」更快。</div></div></div>
+            <div class="phase-item"><div class="phase-num">2</div><div class="phase-content"><div class="phase-name">第二阶段（HP 70% → 35%）</div><div class="phase-desc">冥凰落地近战，增加「冰爪横扫」和「冰柱破地」。冰柱破地有地面裂缝预警，沿裂缝方向跳跃即可规避。此阶段完美闪避频率更高，「灼热值」积累更快，争取触发弱点状态集中爆发。</div></div></div>
+            <div class="phase-item"><div class="phase-num">3</div><div class="phase-content"><div class="phase-name">第三阶段（HP 35% → 0%）</div><div class="phase-desc">触发「极寒封印」，全场缓慢被冰封，玩家移速降低 30%。需要使用库存中的「炎晶粉末」（可在商店或赤炎兽处获得）解除冰封状态。解封后有 6 秒时间窗口正常移动和输出。</div></div></div>
+          </div>
+        </div>
+        <div class="boss-tips">
+          <div class="bp-title">实战技巧</div>
+          <div class="tips-grid">
+            <div class="tip-item"><div class="tip-icon">🔥</div><div class="tip-name">提前准备炎晶粉末</div><div class="tip-desc">第三阶段必备，建议至少携带 3 个。可以在稷下学宫商店以 500 元流石购买。</div></div>
+            <div class="tip-item"><div class="tip-icon">⚡</div><div class="tip-name">积累灼热值</div><div class="tip-desc">每次完美闪避 +15 灼热值，格挡冰羽 +8，灼热值满 100 后触发 Boss 弱点状态持续 4 秒。</div></div>
+            <div class="tip-item"><div class="tip-icon">❄️</div><div class="tip-name">冰羽射击规律</div><div class="tip-desc">冰羽呈扇形 5 发，中间 3 发密集，两侧各 1 发间距较大。侧移一步即可从缝隙穿过。</div></div>
+            <div class="tip-item"><div class="tip-icon">🎵</div><div class="tip-name">推荐搭配甄姬</div><div class="tip-desc">甄姬的冻结免疫特性在此 Boss 战中可以保持移速不受影响，且火焰属性可克制冥凰弱点。</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand"><div class="footer-logo">元流志</div><div class="footer-desc">Honor of Kings: World 第三方攻略社区，由玩家自发整理维护。</div></div>
+      <div class="footer-links">
+        <div class="footer-col"><div class="footer-col-title">攻略</div><a href="heroes.html">英雄图鉴</a><a href="bosses.html">Boss图鉴</a><a href="map.html">地图探索</a><a href="tier.html">强度榜单</a></div>
+        <div class="footer-col"><div class="footer-col-title">资讯</div><a href="news.html">版本动态</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="footer-disclaimer">本站为玩家自发整理的第三方内容站，与 Tencent Games 无官方关联。</div><div>© 2026 元流志</div></div>
+  </div>
+</footer>
+<script src="shared.js"></script>
+</body>
+</html>
