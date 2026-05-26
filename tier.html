@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>强度榜 · 元流志</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.tier-page-layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
+.tier-main { display: flex; flex-direction: column; gap: 16px; }
+
+.tier-block { background: rgba(245,239,224,0.03); border: 1px solid rgba(245,239,224,0.08); border-radius: 10px; overflow: hidden; }
+.tier-block-header { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid rgba(245,239,224,0.06); }
+.tier-letter { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 700; width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tl-s  { background: rgba(232,184,75,0.15); color: var(--gold-light); border: 1px solid rgba(232,184,75,0.3); }
+.tl-a  { background: rgba(155,33,32,0.15); color: #e08080; border: 1px solid rgba(155,33,32,0.25); }
+.tl-b  { background: rgba(26,107,107,0.15); color: var(--teal-light); border: 1px solid rgba(26,107,107,0.25); }
+.tl-c  { background: rgba(245,239,224,0.07); color: rgba(245,239,224,0.5); border: 1px solid rgba(245,239,224,0.12); }
+.tier-block-label { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 600; color: var(--paper); flex: 1; }
+.tier-block-desc { font-size: 11px; color: rgba(245,239,224,0.4); }
+
+.tier-heroes-row { display: flex; flex-direction: column; gap: 0; }
+.tier-hero-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid rgba(245,239,224,0.04); text-decoration: none; color: inherit; transition: background 0.15s; }
+.tier-hero-item:last-child { border-bottom: none; }
+.tier-hero-item:hover { background: rgba(245,239,224,0.03); }
+.tier-hero-avatar { width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.tier-hero-info { flex: 1; }
+.tier-hero-name { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 600; color: var(--paper); margin-bottom: 3px; }
+.tier-hero-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tier-hero-tag { font-size: 10px; padding: 1px 7px; border-radius: 2px; }
+.tier-hero-reason { font-size: 12px; color: rgba(245,239,224,0.55); line-height: 1.5; max-width: 380px; }
+.tier-hero-change { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.change-up   { color: var(--gold); font-size: 12px; }
+.change-down { color: #e07070; font-size: 12px; }
+.change-same { color: rgba(245,239,224,0.25); font-size: 12px; }
+.tier-hero-score { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold-light); }
+
+.tier-sidebar { display: flex; flex-direction: column; gap: 16px; }
+.sidebar-panel { background: rgba(245,239,224,0.03); border: 1px solid rgba(245,239,224,0.08); border-radius: 10px; padding: 20px; }
+.sp-title { font-family: 'Noto Serif SC', serif; font-size: 14px; font-weight: 600; color: var(--paper); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.sp-title::before { content:''; width:3px; height:14px; background:linear-gradient(to bottom,var(--gold-light),var(--gold)); border-radius:2px; }
+.sp-item { display: flex; justify-content: space-between; font-size: 12px; color: rgba(245,239,224,0.6); padding: 7px 0; border-bottom: 1px solid rgba(245,239,224,0.05); }
+.sp-item:last-child { border-bottom: none; }
+.sp-val { color: var(--paper); font-weight: 500; }
+
+.synergy-item { background: rgba(245,239,224,0.04); border: 1px solid rgba(245,239,224,0.07); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+.syn-heroes { font-size: 18px; margin-bottom: 6px; }
+.syn-name { font-size: 13px; font-weight: 500; color: var(--paper); margin-bottom: 3px; }
+.syn-desc { font-size: 11px; color: rgba(245,239,224,0.5); line-height: 1.5; }
+.syn-rating { font-family:'Cinzel',serif; font-size:12px; color:var(--gold); float:right; }
+
+@media(max-width:1024px){ .tier-page-layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-mark">元</div>元流志</a>
+    <div class="nav-links">
+      <a href="index.html">首页</a><a href="heroes.html">英雄图鉴</a>
+      <a href="bosses.html">Boss攻略</a><a href="map.html">地图探索</a>
+      <a href="tier.html" class="active">强度榜</a><a href="news.html">版本资讯</a>
+      <a href="daily.html">今日清单</a>
+    </div>
+    <div class="nav-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="搜索英雄…">
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">首页</a><a href="heroes.html">英雄图鉴</a><a href="bosses.html">Boss攻略</a><a href="map.html">地图探索</a><a href="tier.html" class="active">强度榜</a><a href="news.html">版本资讯</a><a href="daily.html">今日清单</a>
+</div>
+
+<!-- Trust bar -->
+<div style="position:relative;z-index:1;background:rgba(10,8,4,0.7);border-bottom:1px solid rgba(245,239,224,0.05);padding:7px 0;">
+  <div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <span style="font-size:11px;color:rgba(245,239,224,0.35);display:flex;gap:8px;align-items:center;"><span style="color:#4caf7d;">✓</span>无广告 · Ad-Free</span>
+    <span style="font-size:11px;color:rgba(245,239,224,0.35);">🇨🇳🇬🇧 中英双语 · Bilingual</span>
+    <a href="daily.html" style="margin-left:auto;font-size:11px;color:var(--gold);text-decoration:none;border:1px solid rgba(200,146,42,0.2);padding:3px 10px;border-radius:4px;">⏱ Boss 计时器 →</a>
+  </div>
+</div>
+<div class="wrap">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">首页</a><span>/</span><span>强度榜</span></div>
+    <div class="page-eyebrow">Tier List · S0 Season</div>
+    <h1 class="page-title">S0 赛季<em>强度榜</em></h1>
+    <p class="page-desc">基于社区玩家数据与测试反馈整理的英雄强度评级，每次大版本更新后同步调整。仅供参考，实际强度因玩家操作和配装而有差异。</p>
+  </div>
+
+  <div class="filter-bar reveal">
+    <button class="filter-btn active" data-filter="all">综合强度</button>
+    <button class="filter-btn" data-filter="solo">单人PvE</button>
+    <button class="filter-btn" data-filter="boss">Boss战</button>
+    <button class="filter-btn" data-filter="explore">探索效率</button>
+  </div>
+
+  <div class="tier-page-layout">
+    <div class="tier-main">
+
+      <!-- S Tier -->
+      <div class="tier-block reveal">
+        <div class="tier-block-header">
+          <div class="tier-letter tl-s">S</div>
+          <div>
+            <div class="tier-block-label">神级 · 当前版本顶尖强度</div>
+            <div class="tier-block-desc">显著强于其他等级，推荐优先培养</div>
+          </div>
+        </div>
+        <div class="tier-heroes-row">
+          <a href="heroes.html#yuanliuzhi" class="tier-hero-item">
+            <div class="tier-hero-avatar" style="background:rgba(200,146,42,0.12);">🌟</div>
+            <div class="tier-hero-info">
+              <div class="tier-hero-name">元流之子</div>
+              <div class="tier-hero-tags"><span class="tier-hero-tag" style="background:rgba(200,146,42,0.12);color:var(--gold);border:1px solid rgba(200,146,42,0.2);">战士</span><span class="tier-hero-tag" style="background:rgba(200,146,42,0.12);color:var(--gold);border:1px solid rgba(200,146,42,0.2);">主角</span></div>
+              <div class="tier-hero-reason" style="margin-top:4px;">四形态切换带来无与伦比的输出上限，配装成熟后综合实力最强。适合所有内容。</div>
+            </div>
+            <div class="tier-hero-change"><div class="tier-hero-score">98</div><span class="change-up">▲ 强势</span></div>
+          </a>
+          <a href="heroes.html#gongsunli" class="tier-hero-item">
+            <div class="tier-hero-avatar" style="background:rgba(155,33,32,0.12);">🔥</div>
+            <div class="tier-hero-info">
+              <div class="tier-hero-name">公孙离</div>
+              <div class="tier-hero-tags"><span class="tier-hero-tag" style="background:rgba(155,33,32,0.12);color:#e07070;border:1px solid rgba(155,33,32,0.2);">射手</span><span class="tier-hero-tag" style="background:rgba(155,33,32,0.12);color:#e07070;border:1px solid rgba(155,33,32,0.2);">远程</span></div>
+              <div class="tier-hero-reason" style="margin-top:4px;">S0 射程提升后安全输出能力大幅提升，位移技能优秀，Boss 战表现顶级，远程首选。</div>
+            </div>
+            <div class="tier-hero-change"><div class="tier-hero-score">95</div><span class="change-up">▲ 上升</span></div>
+          </a>
+          <a href="heroes.html#lixin" class="tier-hero-item">
+            <div class="tier-hero-avatar" style="background:rgba(100,140,220,0.12);">⚡</div>
+            <div class="tier-hero-info">
+              <div class="tier-hero-name">李信</div>
+              <div class="tier-hero-tags"><span class="tier-hero-tag" style="background:rgba(200,146,42,0.12);color:var(--gold);border:1px solid rgba(200,146,42,0.2);">战士</span><span class="tier-hero-tag" style="background:rgba(200,146,42,0.12);color:var(--gold);border:1px solid rgba(200,146,42,0.2);">近战</span></div>
+              <div class="tier-hero-reason" style="margin-top:4px;">单体爆发最高，完美闪避连携伤害机制上手后输出可观。需要一定操作，技术型首选。</div>
+            </div>
+            <div class="tier-hero-change"><div class="tier-hero-score">93</div><span class="change-same">— 稳定</span></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- A Tier -->
+      <div class="tier-block reveal">
+        <div class="tier-block-header">
+          <div class="tier-letter tl-a">A</div>
+          <div>
+            <div class="tier-block-label">强力 · 全面可用的优秀选择</div>
+            <div class="tier-block-desc">各方面均衡或在特定内容有突出表现</div>
+          </div>
+        </div>
+        <div class="tier-heroes-row">
+          <a href="heroes.html#zhenji" class="tier-hero-item">
+            <div class="tier-hero-avatar" style="background:rgba(100,50,200,0.12);">🎵</div>
+            <div class="tier-hero-info">
+              <div class="tier-hero-name">甄姬</div>
+              <div class="tier-hero-tags"><span class="tier-hero-tag" style="background:rgba(100,50,200,0.12);color:#a08ae2;border:1px solid rgba(100,50,200,0.2);">法师</span></div>
+              <div class="tier-hero-reason" style="margin-top:4px;">冻结机制在冰系弱点 Boss 战（如冥凰）中表现极为突出，S0 版本整体上升明显。</div>
+            </div>
+            <div class="tier-hero-change"><div class="tier-hero-score">87</div><span class="change-up">▲ 上升</span></div>
+          </a>
+          <a href="heroes.html#zhuangzhou" class="tier-hero-item">
+            <div class="tier-hero-avatar" style="background:rgba(26,107,107,0.12);">🌿</div>
+            <div class="tier-hero-info">
+              <div class="tier-hero-name">庄周</div>
+              <div class="tier-hero-tags"><span class="tier-hero-tag" style="background:rgba(26,107,107,0.12);color:var(--teal-light);border:1px solid rgba(26,107,107,0.2);">坦克</span><span class="tier-hero-tag" style="background:rgba(26,107,107,0.12);color:var(--teal-light);border:1px solid rgba(26,107,107,0.2);">辅助</span></div>
+              <div class="tier-hero-reason" style="margin-top:4px;">S0 削弱后频率下降，但护盾量与控场能力仍强。组队时作为先锋依然不可替代。</div>
+            </div>
+            <div class="tier-hero-change"><div class="tier-hero-score">82</div><span class="change-down">▼ 小幅下调</span></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- B Tier -->
+      <div class="tier-block reveal">
+        <div class="tier-block-header">
+          <div class="tier-letter tl-b">B</div>
+          <div>
+            <div class="tier-block-label">普通 · 可用但有明显局限</div>
+            <div class="tier-block-desc">在特定场景或搭配下有发挥空间</div>
+          </div>
+        </div>
+        <div class="tier-heroes-row">
+          <a href="heroes.html#lanlingwang" class="tier-hero-item">
+            <div class="tier-hero-avatar" style="background:rgba(80,60,200,0.12);">🎭</div>
+            <div class="tier-hero-info">
+              <div class="tier-hero-name">兰陵王</div>
+              <div class="tier-hero-tags"><span class="tier-hero-tag" style="background:rgba(80,60,200,0.12);color:#a08ae2;border:1px solid rgba(80,60,200,0.2);">刺客</span></div>
+              <div class="tier-hero-reason" style="margin-top:4px;">隐匿机制在 PvE 中受限，Boss 频繁转身使潜行优势难以发挥。操作上限高但回报有限。</div>
+            </div>
+            <div class="tier-hero-change"><div class="tier-hero-score">71</div><span class="change-same">— 稳定</span></div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="tier-sidebar">
+      <div class="sidebar-panel reveal">
+        <div class="sp-title">榜单说明</div>
+        <div class="sp-item"><span>评测版本</span><span class="sp-val">S0 · v1.0</span></div>
+        <div class="sp-item"><span>数据来源</span><span class="sp-val">社区投票</span></div>
+        <div class="sp-item"><span>参与人数</span><span class="sp-val">2,847</span></div>
+        <div class="sp-item"><span>评测场景</span><span class="sp-val">综合PvE</span></div>
+        <div class="sp-item"><span>上次更新</span><span class="sp-val">2026.04.12</span></div>
+      </div>
+
+      <div class="sidebar-panel reveal">
+        <div class="sp-title">推荐搭配</div>
+        <div class="synergy-item">
+          <div class="syn-heroes">⚡🔥 <span class="syn-rating">S+</span></div>
+          <div class="syn-name">李信 + 公孙离</div>
+          <div class="syn-desc">近远程互补，李信吸引仇恨，公孙离安全输出，是目前评价最高的双人配合。</div>
+        </div>
+        <div class="synergy-item">
+          <div class="syn-heroes">🌟🌿 <span class="syn-rating">S</span></div>
+          <div class="syn-name">元流之子 + 庄周</div>
+          <div class="syn-desc">庄周护盾为主角提供生存保障，主角专注输出，适合高难度 Boss 战。</div>
+        </div>
+        <div class="synergy-item">
+          <div class="syn-heroes">🎵❄️ <span class="syn-rating">A+</span></div>
+          <div class="syn-name">甄姬 + 冥凰副本</div>
+          <div class="syn-desc">甄姬冻结 + 火焰弱点双重克制，专项副本中表现远超其他英雄。</div>
+        </div>
+      </div>
+
+      <div class="sidebar-panel reveal">
+        <div class="sp-title">本周热度</div>
+        <div class="sp-item"><span>🌟 元流之子</span><span class="sp-val">34.2%</span></div>
+        <div class="sp-item"><span>🔥 公孙离</span><span class="sp-val">28.7%</span></div>
+        <div class="sp-item"><span>⚡ 李信</span><span class="sp-val">19.1%</span></div>
+        <div class="sp-item"><span>🌿 庄周</span><span class="sp-val">11.4%</span></div>
+        <div class="sp-item"><span>🎵 甄姬</span><span class="sp-val">6.6%</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand"><div class="footer-logo">元流志</div><div class="footer-desc">Honor of Kings: World 第三方攻略社区，由玩家自发整理维护。</div></div>
+      <div class="footer-links">
+        <div class="footer-col"><div class="footer-col-title">攻略</div><a href="heroes.html">英雄图鉴</a><a href="bosses.html">Boss图鉴</a><a href="map.html">地图探索</a><a href="tier.html">强度榜单</a></div>
+        <div class="footer-col"><div class="footer-col-title">资讯</div><a href="news.html">版本动态</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="footer-disclaimer">本站为玩家自发整理的第三方内容站，与 Tencent Games 无官方关联。</div><div>© 2026 元流志</div></div>
+  </div>
+</footer>
+<script src="shared.js"></script>
+</body>
+</html>
